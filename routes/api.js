@@ -6,7 +6,8 @@ const adminauthcontroller = require('../controller/adminauthcontroller'),
       userAuth = require('../middleware/check-user-auth'),
       adminAuth = require('../middleware/check-auth'),
       AdminQuestionController = require('../controller/AdminQuestionController'),
-      AdminOtherController = require('../controller/AdminOtherController');
+      AdminOtherController = require('../controller/AdminOtherController'),
+      UserQuestionController = require('../controller/UserQuestionController');
 
 const MIME_TYPE_MAP = {
     'image/png': 'png',
@@ -47,5 +48,6 @@ router.post('/admin/updatecodequestion/:id', adminAuth, AdminQuestionController.
 router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegisteredCandidate);
 
 //User Question
-
+router.get('/user/getquestions', userAuth, UserQuestionController.getQuestions);
+router.get('/user/getcodingquestions', userAuth, UserQuestionController.getCodingQuestions);
 module.exports = router;
