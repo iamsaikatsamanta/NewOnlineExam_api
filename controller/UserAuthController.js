@@ -4,7 +4,8 @@ const User = require('../Models/user'),
       nodemailer= require('nodemailer'),
       sendgridtransport= require('nodemailer-sendgrid-transport'),
       jwt = require('jsonwebtoken') ;
-      config = require('../config/config');
+      config = require('../config/config'),
+      Common = require('../utils/response');
 const transpoter= nodemailer.createTransport(sendgridtransport({
     auth:{
         api_key: process.env.API_KEY
@@ -18,21 +19,22 @@ exports.userRegister = (req,res, next) =>{
             refId: 'OE'+ getRefId(),
             course: req.body.course,
             year: req.body.year,
-            email: req.body.email,
+            lcoal: {
+                email: req.body.email,
+                password: hash
+            },
             phoneno: req.body.phoneno,
             name: req.body.name,
             dob: req.body.dob,
-            password: hash,
-            img_url: url + '/images/user/' + req.file.filename
+            img_url: url + '/images/user/' + req.file.filename,
+            method: 'Local'
         });
         user.save().then(result=> {
             const marks = new Marks({
                 user: result.refId
             });
             marks.save();
-            res.status(200).json({
-                message: 'Registration Successful'
-            });
+            res.status(200).json(Common.generateResponse(0, result));
         }).then(result =>{
             transpoter.sendMail({
                 to: user.email,
@@ -42,9 +44,7 @@ exports.userRegister = (req,res, next) =>{
             });
         }).catch(error =>{
             console.log(error);
-            res.status(500).json({
-                error: error
-            });
+            res.status(500).json(Common.generateResponse());
         });
     });
 };
@@ -80,6 +80,37 @@ exports.userLogin = (req,res,next) => {
                 message: 'Auth Failed'
             });
         });
+};
+
+exports.googleRegistration =(req, res) => {
+    console.log(req.authInfo);
+    if (req.authInfo ==='New User') {
+       return res.json(Common.generateResponse(0, req.user));
+    } else if (req.authInfo ==='Existing User') {
+        return res.json(Common.generateResponse(5))
+    }
+};
+
+exports.googleLogin =(req, res) => {
+    console.log(req.authInfo);
+    if (req.authInfo ==='Existing User') {
+        User.findOne({email: req.user.email})
+            .then(resp => {
+                const token = jwt.sign({refId: resp.refId, name: resp.name, img_url: resp.img_url},
+                    config.JWT_SECRET_USER.Secret,
+                    {expiresIn: '90'}
+                ); 
+                res.json(Common.generateResponse(0, token));
+            })
+            .catch(err => {
+                return res.json(Common.generateResponse(100, err))    
+              });
+    } else {
+        res.json({
+            code: 20,
+            message: 'You are Not Registered'
+        });
+    }
 };
 
 function getRefId(){

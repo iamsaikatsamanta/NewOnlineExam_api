@@ -6,7 +6,9 @@ const adminauthcontroller = require('../controller/adminauthcontroller'),
       userAuth = require('../middleware/check-user-auth'),
       adminAuth = require('../middleware/check-auth'),
       AdminQuestionController = require('../controller/AdminQuestionController'),
-      AdminOtherController = require('../controller/AdminOtherController');
+      AdminOtherController = require('../controller/AdminOtherController'),
+      passportjs = require('../controller/passport'),
+      passport = require('passport');
 
 const MIME_TYPE_MAP = {
     'image/png': 'png',
@@ -35,6 +37,9 @@ router.post('/setnewpassword',adminauthcontroller.setNewPassword);
 //User Auth
 router.post('/user/register', multer({storage: storage}).single('image'),Userauthcontroller.userRegister);
 router.post('/user/login"', Userauthcontroller.userLogin);
+// router.post('/user/fblogin', Userauthcontroller.userFbLogin);
+router.post('/user/googlelogin',passport.authenticate('googleLogin', {session: false}), Userauthcontroller.googleLogin);
+router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
 //Admin Question
 router.post('/admin/savequestion', adminAuth, AdminQuestionController.saveQuestion);
 router.post('/admin/savecodingquestion', adminAuth, AdminQuestionController.saveCodeingQuestions);
@@ -42,6 +47,7 @@ router.get('/admin/getquestions', adminAuth, AdminQuestionController.getQuestion
 router.get('/admin/getcodingquestions', adminAuth, AdminQuestionController.getCodingQuestions);
 router.post('/admin/updatequestion/:id', adminAuth, AdminQuestionController.updateQuestion);
 router.post('/admin/updatecodequestion/:id', adminAuth, AdminQuestionController.updateCodingQuestion);
+
 
 //Admin Other
 router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegisteredCandidate);
