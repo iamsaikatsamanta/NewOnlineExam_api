@@ -18,9 +18,12 @@ exports.getRegularQuestion = (req,res,next) => {
 exports.getCodingQuestions = (req,res,next) => {
     CodingQuestion.find()
         .then(codingQuestion => {
-            delete codingQuestion.input;
-            delete codingQuestion.output;
-            res.json(Common.generateResponse(0, codingQuestion));
+            res.json(Common.generateResponse(0,codingQuestion.map(question =>{
+                return {
+                    id: question._id,
+                    question: question.question
+                };
+            })));
         })
         .catch(err => {
            res.json(Common.generateResponse(100, err))
