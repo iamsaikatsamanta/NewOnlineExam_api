@@ -6,8 +6,8 @@ const passport = require('passport'),
 
 
 passport.use('googleLogin', new GoogleStrategy({
-    clientID: '1033282983751-s4m906cdfac76ujnrodalcucc3586ktc.apps.googleusercontent.com',
-    clientSecret: 'bgVT0wHiy1XGI3M1jIseG35h'
+    clientID: process.env.GOOGLE_APP_ID,
+    clientSecret: process.env.GOOGLE_APP_SECRET
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         console.log(JSON.stringify(profile));
@@ -22,8 +22,8 @@ passport.use('googleLogin', new GoogleStrategy({
 }));
 
 passport.use('googleRegistration', new GoogleStrategy({
-    clientID: '1033282983751-s4m906cdfac76ujnrodalcucc3586ktc.apps.googleusercontent.com',
-    clientSecret: 'bgVT0wHiy1XGI3M1jIseG35h'
+    clientID: process.env.GOOGLE_APP_ID,
+    clientSecret: process.env.GOOGLE_APP_SECRET
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const exuser = await User.findOne({email: profile.emails[0].value });
@@ -37,7 +37,8 @@ passport.use('googleRegistration', new GoogleStrategy({
             },
             email: profile.emails[0].value,
             refId: 'OE'+getRefId(),
-            name: profile.name.givenName +' '+ profile.name.familyName
+            name: profile.name.givenName +' '+ profile.name.familyName,
+            img_url: profile.photos[0].value
         });
         await newUser.save();
         done(null,newUser, 'New User');
@@ -46,6 +47,51 @@ passport.use('googleRegistration', new GoogleStrategy({
     }
 
 }));
+
+passport.use('facebookRegistration', new facebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET
+}, async (accessToken, refreshToken, profile, done) => {
+    console.log(profile);
+    try {
+        const exuser = await User.findOne({email: profile.emails[0].value });
+        if (exuser) {
+            return done(null,exuser,'Existing User')
+        }
+        const newUser = new User({
+            method: 'Facebook',
+            facebook: {
+                id: profile.id,
+            },
+            email: profile.emails[0].value,
+            refId: 'OE'+getRefId(),
+            name: profile.name.givenName +' '+ profile.name.familyName,
+            img_url: profile.photos[0].value
+        });
+        await newUser.save();
+        done(null,newUser, 'New User');
+    }catch (err) {
+        done(err,false,err.message)
+    }
+
+}));
+
+passport.use('facebookLogin', new facebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        console.log(JSON.stringify(profile));
+        const exuser = await User.findOne({ "facebook.id": profile.id });
+        if (exuser) {
+            return done(null,exuser,'Existing User')
+        }
+        return done(null,'User Already Exists');
+    }catch (err) {
+        done(err,false,err.message)
+    }
+}));
+
 function getRefId(){
     var d = new Date();
     var date = d.getFullYear().toString();

@@ -19,8 +19,8 @@ exports.userRegister = (req,res, next) =>{
             refId: 'OE'+ getRefId(),
             course: req.body.course,
             year: req.body.year,
+            email: req.body.email,
             lcoal: {
-                email: req.body.email,
                 password: hash
             },
             phoneno: req.body.phoneno,
@@ -98,7 +98,7 @@ exports.googleLogin =(req, res) => {
             .then(resp => {
                 const token = jwt.sign({refId: resp.refId, name: resp.name, img_url: resp.img_url},
                     config.JWT_SECRET_USER.Secret,
-                    {expiresIn: '90'}
+                    {expiresIn: '90m'}
                 ); 
                 res.json(Common.generateResponse(0, token));
             })
@@ -108,7 +108,36 @@ exports.googleLogin =(req, res) => {
     } else {
         res.json({
             code: 20,
-            message: 'You are Not Registered'
+            message: 'You are Not Registered Via Google'
+        });
+    }
+};
+exports.facebookRegistration =(req, res) => {
+    console.log(req.authInfo);
+    if (req.authInfo ==='New User') {
+        return res.json(Common.generateResponse(0, req.user));
+    } else if (req.authInfo ==='Existing User') {
+        return res.json(Common.generateResponse(5))
+    }
+};
+
+exports.facebookLogin = (req,res,next)=> {
+    if (req.authInfo ==='Existing User') {
+        User.findOne({email: req.user.email})
+            .then(resp => {
+                const token = jwt.sign({refId: resp.refId, name: resp.name, img_url: resp.img_url},
+                    config.JWT_SECRET_USER.Secret,
+                    {expiresIn: '90m'}
+                );
+                res.json(Common.generateResponse(0, token));
+            })
+            .catch(err => {
+                return res.json(Common.generateResponse(100, err))
+            });
+    } else {
+        res.json({
+            code: 20,
+            message: 'You are Not Registered Via Facebook'
         });
     }
 };

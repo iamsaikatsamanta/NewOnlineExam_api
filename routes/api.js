@@ -7,6 +7,7 @@ const adminauthcontroller = require('../controller/adminauthcontroller'),
       adminAuth = require('../middleware/check-auth'),
       AdminQuestionController = require('../controller/AdminQuestionController'),
       AdminOtherController = require('../controller/AdminOtherController'),
+      UserQuestionController = require('../controller/UserQuestionController'),
       passportjs = require('../controller/passport'),
       passport = require('passport');
 
@@ -37,7 +38,8 @@ router.post('/setnewpassword',adminauthcontroller.setNewPassword);
 //User Auth
 router.post('/user/register', multer({storage: storage}).single('image'),Userauthcontroller.userRegister);
 router.post('/user/login"', Userauthcontroller.userLogin);
-// router.post('/user/fblogin', Userauthcontroller.userFbLogin);
+router.post('/user/fblogin', passport.authenticate('facebookLogin', {session: false}), Userauthcontroller.facebookLogin);
+router.post('/user/fbrgistration', passport.authenticate('facebookRegistration', {session: false}), Userauthcontroller.facebookRegistration);
 router.post('/user/googlelogin',passport.authenticate('googleLogin', {session: false}), Userauthcontroller.googleLogin);
 router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
 //Admin Question
@@ -53,5 +55,7 @@ router.post('/admin/updatecodequestion/:id', adminAuth, AdminQuestionController.
 router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegisteredCandidate);
 
 //User Question
+router.get('/user/get-question/regular', UserQuestionController.getRegularQuestion);
+router.get('/user/get-question/coding', UserQuestionController.getCodingQuestions);
 
 module.exports = router;
