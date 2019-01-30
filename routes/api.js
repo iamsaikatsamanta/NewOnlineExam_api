@@ -49,6 +49,8 @@ router.get('/admin/getquestions', adminAuth, AdminQuestionController.getQuestion
 router.get('/admin/getcodingquestions', adminAuth, AdminQuestionController.getCodingQuestions);
 router.post('/admin/updatequestion/:id', adminAuth, AdminQuestionController.updateQuestion);
 router.post('/admin/updatecodequestion/:id', adminAuth, AdminQuestionController.updateCodingQuestion);
+router.delete('/admin/delete-question/:id', adminAuth, AdminQuestionController.deleteQuestion);
+router.delete('/admin/delete-coding-question/:id', adminAuth, AdminQuestionController.deleteCodingQuestion);
 
 
 //Admin Other

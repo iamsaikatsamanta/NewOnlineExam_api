@@ -86,3 +86,23 @@ exports.updateCodingQuestion = (req,res,next) =>{
             return res.json(Common.generateResponse(100, err));
         });
 };
+
+exports.deleteQuestion = () => {
+    RegQuestion.findByIdAndRemove(req.params._id)
+        .then(resp=> {
+            return res.json(Common.generateResponse(0, resp))
+        })
+        .catch(err => {
+            return res.json(Common.generateResponse(100, err));
+        })
+};
+
+exports.deleteCodingQuestion = () => {
+    CodeingQuestion.findByIdAndRemove(req.params._id)
+        .then(resp=> {
+            return res.json(Common.generateResponse(0, resp))
+        })
+        .catch(err => {
+            return res.json(Common.generateResponse(100, err));
+        })
+};
