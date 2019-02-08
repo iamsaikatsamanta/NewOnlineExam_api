@@ -38,10 +38,15 @@ router.post('/setnewpassword',adminauthcontroller.setNewPassword);
 //User Auth
 router.post('/user/register', multer({storage: storage}).single('image'),Userauthcontroller.userRegister);
 router.post('/user/login"', Userauthcontroller.userLogin);
-router.post('/user/fblogin', passport.authenticate('facebookLogin', {session: false}), Userauthcontroller.facebookLogin);
-router.post('/user/fbrgistration', passport.authenticate('facebookRegistration', {session: false}), Userauthcontroller.facebookRegistration);
-router.post('/user/googlelogin',passport.authenticate('googleLogin', {session: false}), Userauthcontroller.googleLogin);
-router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
+// router.post('/user/fblogin', passport.authenticate('facebookLogin', {session: false}), Userauthcontroller.facebookLogin);
+// router.post('/user/fbrgistration', passport.authenticate('facebookRegistration', {session: false}), Userauthcontroller.facebookRegistration);
+// router.post('/user/googlelogin',passport.authenticate('googleLogin', {session: false}), Userauthcontroller.googleLogin);
+// router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
+router.post('/user/exam-login',Userauthcontroller.examLogin);
+router.get('/user/get-user/:refId', userAuth,Userauthcontroller.getUser);
+router.post('/user/fil-form', userAuth, Userauthcontroller.filForm);
+router.post('/user/update-user-info', userAuth, Userauthcontroller.updateUserInfo);
+router.get('/user/get-user-info', userAuth, Userauthcontroller.getUserInfo);
 //Admin Question
 router.post('/admin/savequestion', adminAuth, AdminQuestionController.saveQuestion);
 router.post('/admin/savecodingquestion', adminAuth, AdminQuestionController.saveCodeingQuestions);

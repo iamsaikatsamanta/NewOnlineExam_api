@@ -9,6 +9,7 @@ module.exports = (req,res,next) => {
     const token =req.query.user_authorization.split("_")[1];
     jwt.verify(token, config.JWT_SECRET_USER.Secret, (err,decode)=> {
       req.userId = decode.refId;
+      req.user = decode;
     });
     next();
   }catch(error){

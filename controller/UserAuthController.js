@@ -5,7 +5,8 @@ const User = require('../Models/user'),
       sendgridtransport= require('nodemailer-sendgrid-transport'),
       jwt = require('jsonwebtoken') ;
       config = require('../config/config'),
-      Common = require('../utils/response');
+      Common = require('../utils/response'),
+      UserInfo = require('../Models/UserInfo');
 const transpoter= nodemailer.createTransport(sendgridtransport({
     auth:{
         api_key: process.env.API_KEY
@@ -17,17 +18,9 @@ exports.userRegister = (req,res, next) =>{
     bcrypt.hash(req.body.password ,10).then(hash =>{
         const user =new User({
             refId: 'OE'+ getRefId(),
-            course: req.body.course,
-            year: req.body.year,
             email: req.body.email,
-            lcoal: {
-                password: hash
-            },
-            phoneno: req.body.phoneno,
+            password: hash,
             name: req.body.name,
-            dob: req.body.dob,
-            img_url: url + '/images/user/' + req.file.filename,
-            method: 'Local'
         });
         user.save().then(result=> {
             const marks = new Marks({
@@ -38,7 +31,7 @@ exports.userRegister = (req,res, next) =>{
         }).then(result =>{
             transpoter.sendMail({
                 to: user.email,
-                from: 'onlinexm@akcsit.in',
+                from: 'saikat@akcsit.in',
                 subject: 'Registration Successful',
                 html:'<h1>You have Successfully Registered</h1>'
             });
@@ -67,7 +60,7 @@ exports.userLogin = (req,res,next) => {
                     message: 'Auth Failed'
                 });
             }
-            const token = jwt.sign({refId: fetcheduser.refId, name: fetcheduser.name, img_url: fetcheduser.img_url},
+            const token = jwt.sign({userid: fetcheduser._id , refId:fetcheduser.refId, name: fetcheduser.name, img_url: fetcheduser.img_url},
                 config.JWT_SECRET_USER.Secret,
                 {expiresIn: '20m'}
             );
@@ -140,6 +133,101 @@ exports.facebookLogin = (req,res,next)=> {
             message: 'You are Not Registered Via Facebook'
         });
     }
+};
+exports.examLogin = (req,res) => {
+    User.findOne({
+        $or :[
+            {refId: req.body.refId},
+            {email: req.body.refId}
+        ]
+    })
+        .then(user => {
+            if (!user) {
+                return res.json(Common.generateResponse(2));
+            }
+            if (user.dob === req.body.password) {
+                const token = jwt.sign({refId: user.refId, name: user.name, img_url: user.img_url},
+                    config.JWT_SECRET_USER.Secret,
+                    {expiresIn: '2h'}
+                );
+                res.status(200).json(Common.generateResponse(0,token));
+            } else {
+                return res.json(Common.generateResponse(2));
+            }
+        })
+};
+exports.getUser = (req,res) => {
+  User.findOne({refId: req.params.refId})
+      .select(['name', 'refId','img_url'])
+      .then(user=> {
+          if (user) {
+              return res.json(Common.generateResponse(0, user))
+          }
+          return res.json(Common.generateResponse(3))
+      })
+      .catch(err=> {
+          return res.json(Common.generateResponse(100, err))
+      })
+};
+
+exports.filForm =(req,res) => {
+    const info = new UserInfo({
+        userid: req.user.userid,
+        address: req.body.address,
+        country: req.body.country,
+        state: req.body.state,
+        city: req.body.city,
+        zipcode: req.body.zipcode,
+        college: req.body.college,
+        course: req.body.course,
+        year: req.body.year,
+        phoneno: req.body.phoneno,
+        dob: req.body.dob,
+        parents: req.body.parents
+    })
+    User.findOneAndUpdate({_id: req.user.userid}, {img_url:  req.body.img_url, dob: req.body.dob.split('/').join('')})
+    .then(user => {
+        if(user) {
+            return info.save();
+        } else {
+            return res.json(Common.generateResponse(100));
+        }
+    })
+    .then(user => {
+        if(user) {
+            return res.json(Common.generateResponse(0, user));
+        }
+        return res.json(Common.generateResponse(3));
+    })
+    .catch(err=> {
+        return res.json(Common.generateResponse(100, err));
+    });
+};
+exports.updateUserInfo =(req,res) => {
+    UserInfo.findOneAndUpdate({_id: req.user.userid}, req.body)
+    .then(user => {
+        if(user) {
+            return res.json(Common.generateResponse(0, user));
+        }
+        return res.json(Common.generateResponse(3));
+    })
+    .catch(err=> {
+        return res.json(Common.generateResponse(100, err));
+    });
+};
+
+exports.getUserInfo =(req,res) => {
+    UserInfo.findOne({_id: req.user.userid})
+        .populate('userid')
+        .then(user=> {
+            if(user) {
+                return res.json(Common.generateResponse(0, user));
+            }
+            return res.json(Common.generateResponse(3));
+        })
+        .catch(err=> {
+            return res.json(Common.generateResponse(100, err));
+        });
 };
 
 function getRefId(){
