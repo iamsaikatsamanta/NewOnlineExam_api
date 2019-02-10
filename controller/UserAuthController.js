@@ -44,7 +44,12 @@ exports.userRegister = (req,res, next) =>{
 
 exports.userLogin = (req,res,next) => {
     let fetcheduser;
-    User.findOne({refId: req.body.refId})
+    User.findOne({
+        $or :[
+            {refId: req.body.refId},
+            {email: req.body.refId}
+        ]
+    })
         .then(user => {
             if (!user) {
                 return res.status(401).json({
@@ -120,7 +125,7 @@ exports.facebookLogin = (req,res,next)=> {
             .then(resp => {
                 const token = jwt.sign({refId: resp.refId, name: resp.name, img_url: resp.img_url},
                     config.JWT_SECRET_USER.Secret,
-                    {expiresIn: '90m'}
+                    {expiresIn: '5h'}
                 );
                 res.json(Common.generateResponse(0, token));
             })
@@ -135,12 +140,7 @@ exports.facebookLogin = (req,res,next)=> {
     }
 };
 exports.examLogin = (req,res) => {
-    User.findOne({
-        $or :[
-            {refId: req.body.refId},
-            {email: req.body.refId}
-        ]
-    })
+    User.findOne({refId: req.body.refId})
         .then(user => {
             if (!user) {
                 return res.json(Common.generateResponse(2));
@@ -158,7 +158,7 @@ exports.examLogin = (req,res) => {
 };
 exports.getUser = (req,res) => {
   User.findOne({refId: req.params.refId})
-      .select(['name', 'refId','img_url'])
+      .select(['name', 'refId','img_url','email'])
       .then(user=> {
           if (user) {
               return res.json(Common.generateResponse(0, user))
@@ -227,6 +227,36 @@ exports.getUserInfo =(req,res) => {
         })
         .catch(err=> {
             return res.json(Common.generateResponse(100, err));
+        });
+};
+exports.resetPassword = (req, res) => {
+    let fetcheduser;
+    User.findOne({refId: req.userId})
+        .then(user => {
+            if (!user) {
+                return res.status(401).json({
+                    message: 'Auth Failed'
+                });
+            }
+            fetcheduser = user;
+            return bcrypt.compare(req.body.old, user.password);
+        })
+        .then(result=>{
+            if(!result){
+                return res.json(Common.generateResponse(2, 'Old Password Do Not Match'));
+            }
+            bcrypt.hash(req.body.new ,10).then(hash =>{
+                fetcheduser.password = hash;
+                return fetcheduser.save();     
+            });
+        })
+        .then(resp=> {
+            res.json(Common.generateResponse(0, 'Password Reset Successful'));
+        })
+        .catch(err =>{
+            return res.status(401).json({
+                message: 'Auth Failed'
+            });
         });
 };
 

@@ -8,8 +8,8 @@ const adminauthcontroller = require('../controller/adminauthcontroller'),
       AdminQuestionController = require('../controller/AdminQuestionController'),
       AdminOtherController = require('../controller/AdminOtherController'),
       UserQuestionController = require('../controller/UserQuestionController'),
-      passportjs = require('../controller/passport'),
-      passport = require('passport');
+      UserInfoConroller = require('../controller/userInfoController'),
+    upload = require('../middleware/file-upload');
 
 const MIME_TYPE_MAP = {
     'image/png': 'png',
@@ -32,21 +32,27 @@ const storage = multer.diskStorage({
     }
 });
 //Admin Auth
-router.post("/admin/login",adminauthcontroller.adminLogin);
+router.post('/admin/login',adminauthcontroller.adminLogin);
 router.post('/resetpasswordinit',adminauthcontroller.resetPassword);
 router.post('/setnewpassword',adminauthcontroller.setNewPassword);
 //User Auth
 router.post('/user/register', multer({storage: storage}).single('image'),Userauthcontroller.userRegister);
-router.post('/user/login"', Userauthcontroller.userLogin);
+router.post('/user/login', Userauthcontroller.userLogin);
 // router.post('/user/fblogin', passport.authenticate('facebookLogin', {session: false}), Userauthcontroller.facebookLogin);
 // router.post('/user/fbrgistration', passport.authenticate('facebookRegistration', {session: false}), Userauthcontroller.facebookRegistration);
 // router.post('/user/googlelogin',passport.authenticate('googleLogin', {session: false}), Userauthcontroller.googleLogin);
 // router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
 router.post('/user/exam-login',Userauthcontroller.examLogin);
-router.get('/user/get-user/:refId', userAuth,Userauthcontroller.getUser);
+router.get('/user/get-user/:refId',Userauthcontroller.getUser);
 router.post('/user/fil-form', userAuth, Userauthcontroller.filForm);
 router.post('/user/update-user-info', userAuth, Userauthcontroller.updateUserInfo);
 router.get('/user/get-user-info', userAuth, Userauthcontroller.getUserInfo);
+router.post('/user/update-password', userAuth, Userauthcontroller.resetPassword);
+router.post('/create-state', UserInfoConroller.saveState)
+router.get('/get-country', UserInfoConroller.getCountry)
+router.get('/get-state/:countryId',  UserInfoConroller.getState);
+router.get('/get-city/:stateId',  UserInfoConroller.getCity);
+router.post('/file-upload', upload.single('image'),UserInfoConroller.fileUpload);
 //Admin Question
 router.post('/admin/savequestion', adminAuth, AdminQuestionController.saveQuestion);
 router.post('/admin/savecodingquestion', adminAuth, AdminQuestionController.saveCodeingQuestions);
@@ -64,5 +70,7 @@ router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegi
 //User Question
 router.get('/user/get-question/regular', UserQuestionController.getRegularQuestion);
 router.get('/user/get-question/coding', UserQuestionController.getCodingQuestions);
+
+router.post('/create-state/:id', UserInfoConroller.saveState);
 
 module.exports = router;
