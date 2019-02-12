@@ -25,8 +25,12 @@ exports.userRegister = (req,res, next) =>{
         user.save().then(result=> {
             const marks = new Marks({
                 user: result.refId
-            });
+            });54
             marks.save();
+            const userInfo = new UserInfo({
+                userid: result._id
+            });
+            userInfo.save();
             res.status(200).json(Common.generateResponse(0, result));
         }).then(result =>{
             transpoter.sendMail({
@@ -172,8 +176,7 @@ exports.getUser = (req,res) => {
 
 exports.filForm =(req,res) => {
     const info = new UserInfo({
-        userid: req.user.userid,
-        address: req.body.address,
+        address: req.body.add,
         country: req.body.country,
         state: req.body.state,
         city: req.body.city,
@@ -181,14 +184,15 @@ exports.filForm =(req,res) => {
         college: req.body.college,
         course: req.body.course,
         year: req.body.year,
-        phoneno: req.body.phoneno,
+        phoneno: req.body.phno,
         dob: req.body.dob,
-        parents: req.body.parents
-    })
-    User.findOneAndUpdate({_id: req.user.userid}, {img_url:  req.body.img_url, dob: req.body.dob.split('/').join('')})
+        parents: req.body.parents,
+        formsubmited: true
+    });
+    User.findOneAndUpdate({_id: req.user.userid}, {img_url:  req.body.img_url, dob: req.body.dob.split('-').join('')})
     .then(user => {
         if(user) {
-            return info.save();
+           return UserInfo.findOneAndUpdate({userid: req.user.userid}, info);
         } else {
             return res.json(Common.generateResponse(100));
         }
@@ -217,8 +221,9 @@ exports.updateUserInfo =(req,res) => {
 };
 
 exports.getUserInfo =(req,res) => {
-    UserInfo.findOne({_id: req.user.userid})
-        .populate('userid')
+    console.log(req.user);
+    UserInfo.findOne({userid: req.user.userid})
+        .populate({path: 'userid' , select: ['-password']})
         .then(user=> {
             if(user) {
                 return res.json(Common.generateResponse(0, user));

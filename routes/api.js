@@ -44,7 +44,7 @@ router.post('/user/login', Userauthcontroller.userLogin);
 // router.post('/user/googlergistration',passport.authenticate('googleRegistration', {session: false}), Userauthcontroller.googleRegistration);
 router.post('/user/exam-login',Userauthcontroller.examLogin);
 router.get('/user/get-user/:refId',Userauthcontroller.getUser);
-router.post('/user/fil-form', userAuth, Userauthcontroller.filForm);
+router.post('/user/fill-form', userAuth, Userauthcontroller.filForm);
 router.post('/user/update-user-info', userAuth, Userauthcontroller.updateUserInfo);
 router.get('/user/get-user-info', userAuth, Userauthcontroller.getUserInfo);
 router.post('/user/update-password', userAuth, Userauthcontroller.resetPassword);
@@ -53,6 +53,7 @@ router.get('/get-country', UserInfoConroller.getCountry)
 router.get('/get-state/:countryId',  UserInfoConroller.getState);
 router.get('/get-city/:stateId',  UserInfoConroller.getCity);
 router.post('/file-upload', upload.single('image'),UserInfoConroller.fileUpload);
+router.get('/get-college', UserInfoConroller.getCollege);
 //Admin Question
 router.post('/admin/savequestion', adminAuth, AdminQuestionController.saveQuestion);
 router.post('/admin/savecodingquestion', adminAuth, AdminQuestionController.saveCodeingQuestions);

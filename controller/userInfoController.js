@@ -1,11 +1,12 @@
 const State = require('../Models/states'),
         City = require('../Models/city'),
-        Country = require('../Models/country')
+        Country = require('../Models/country'),
+        College = require('../Models/college'),
         Common = require('../utils/response');
 
 exports.saveState = (req,res) => {
-    const newState = new Country({
-        country: req.body.state
+    const newState = new College({
+        college_name: req.body.state.toUpperCase()
     });
     newState.save()
     .then(resp => {
@@ -42,11 +43,24 @@ exports.getCity = (req,res) => {
     City.find({stateId: req.params.stateId}).sort({city: 1})
     .then(resp => {
         if(resp) {
-            return res.json(Common.generateResponse(0, resp))
+            return res.json(Common.generateResponse(0, resp));
         }
         return res.json(Common.generateResponse(3));
     })
     .catch(err => {
+        return res.json(Common.generateResponse(100, err));
+    })
+};
+
+exports.getCollege = (req, res) => {
+    College.find().sort({college_name: 1})
+    .then(resp => {
+        if(resp.length) {
+            return res.json(Common.generateResponse(0, resp));
+        }
+        return res.json(Common.generateResponse(3));
+    })
+    .catch(err=> {
         return res.json(Common.generateResponse(100, err));
     })
 };
