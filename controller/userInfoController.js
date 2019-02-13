@@ -2,7 +2,9 @@ const State = require('../Models/states'),
         City = require('../Models/city'),
         Country = require('../Models/country'),
         College = require('../Models/college'),
-        Common = require('../utils/response');
+        Common = require('../utils/response'),
+        User = require('../Models/user'),
+        UserInfo = require('../Models/UserInfo');
 
 exports.saveState = (req,res) => {
     const newState = new College({
@@ -67,4 +69,34 @@ exports.getCollege = (req, res) => {
 
 exports.fileUpload = (req,res) => {
     res.status(200).json(Common.generateResponse(0, req.file.location));
+};
+
+exports.applyForExam = (req, res) => {
+  User.findOneAndUpdate({_id: req.user.userid},{appliedforexam: true})
+  .then(resp => {
+    if(resp) {
+        return res.json(Common.generateResponse(0, resp));
+    } 
+    return res.json(Common.generateResponse(3));
+  })
+  .catch(err => {
+      return res.json(Common.generateResponse(100, err));
+  })
+};
+
+exports.getUserDetails = (req,res) => {
+    UserInfo.findOne({userid: req.user.userid})
+    .populate('country')
+    .populate('state')
+    .populate('city')
+    .populate('college')
+    .then(resp => {
+        if(resp) {
+            return res.json(Common.generateResponse(0, resp));
+        } 
+        return res.json(Common.generateResponse(3));
+    })
+    .catch(err => {
+        return res.json(Common.generateResponse(100, err));
+    })
 };

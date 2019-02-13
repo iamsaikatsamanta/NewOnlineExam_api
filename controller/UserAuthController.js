@@ -176,6 +176,7 @@ exports.getUser = (req,res) => {
 
 exports.filForm =(req,res) => {
     const info = new UserInfo({
+        userid: req.user.userid,
         address: req.body.add,
         country: req.body.country,
         state: req.body.state,
@@ -184,15 +185,18 @@ exports.filForm =(req,res) => {
         college: req.body.college,
         course: req.body.course,
         year: req.body.year,
-        phoneno: req.body.phno,
+        phoneno: req.body.phoneno,
         dob: req.body.dob,
-        parents: req.body.parents,
-        formsubmited: true
+        parents: req.body.parents
     });
-    User.findOneAndUpdate({_id: req.user.userid}, {img_url:  req.body.img_url, dob: req.body.dob.split('-').join('')})
+    User.findOneAndUpdate({_id: req.user.userid}, {
+        img_url:  req.body.img_url, 
+        dob: req.body.dob.split('-').join(''),
+        formsubmited: true
+    })
     .then(user => {
         if(user) {
-           return UserInfo.findOneAndUpdate({userid: req.user.userid}, info);
+           return info.save();
         } else {
             return res.json(Common.generateResponse(100));
         }
@@ -208,7 +212,7 @@ exports.filForm =(req,res) => {
     });
 };
 exports.updateUserInfo =(req,res) => {
-    UserInfo.findOneAndUpdate({_id: req.user.userid}, req.body)
+    UserInfo.findOneAndUpdate({userid: req.user.userid}, req.body)
     .then(user => {
         if(user) {
             return res.json(Common.generateResponse(0, user));
@@ -222,8 +226,8 @@ exports.updateUserInfo =(req,res) => {
 
 exports.getUserInfo =(req,res) => {
     console.log(req.user);
-    UserInfo.findOne({userid: req.user.userid})
-        .populate({path: 'userid' , select: ['-password']})
+    User.findOne({_id: req.user.userid})
+        .select('-password')
         .then(user=> {
             if(user) {
                 return res.json(Common.generateResponse(0, user));

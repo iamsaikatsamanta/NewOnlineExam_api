@@ -12,9 +12,7 @@ const userInfoSchema = mongoose.Schema({
     year: { type:String},
     phoneno: { type:String},
     dob: { type:String},
-    parents: {type: String},
-    formsubmited: {type: Boolean, default: false},
-    appliedforexam: {type: Boolean, default: false}
+    parents: {type: String}    
 });
 
 module.exports = mongoose.model('UserInfo', userInfoSchema);

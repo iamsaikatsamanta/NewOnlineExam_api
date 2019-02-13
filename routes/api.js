@@ -54,6 +54,8 @@ router.get('/get-state/:countryId',  UserInfoConroller.getState);
 router.get('/get-city/:stateId',  UserInfoConroller.getCity);
 router.post('/file-upload', upload.single('image'),UserInfoConroller.fileUpload);
 router.get('/get-college', UserInfoConroller.getCollege);
+router.get('/user/apply-for-exam', userAuth, UserInfoConroller.applyForExam);
+router.get('/user/get-user-details', userAuth, UserInfoConroller.getUserDetails);
 //Admin Question
 router.post('/admin/savequestion', adminAuth, AdminQuestionController.saveQuestion);
 router.post('/admin/savecodingquestion', adminAuth, AdminQuestionController.saveCodeingQuestions);
@@ -71,7 +73,5 @@ router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegi
 //User Question
 router.get('/user/get-question/regular', UserQuestionController.getRegularQuestion);
 router.get('/user/get-question/coding', UserQuestionController.getCodingQuestions);
-
-router.post('/create-state/:id', UserInfoConroller.saveState);
 
 module.exports = router;

@@ -6,7 +6,9 @@ const userSchema = mongoose.Schema({
   dob: { type:String},
   img_url: { type:String},
   email: { type:String,required: true, unique: true},
-  password: { type:String}
+  password: { type:String},
+  formsubmited: {type: Boolean, default: false},
+  appliedforexam: {type: Boolean, default: false}
 });
 userSchema.plugin(uniqueValidator);
 
