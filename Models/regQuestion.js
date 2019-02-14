@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 var regQSchema = mongoose.Schema({
     question: {type: String, required: true},
-    option: {type: Array, required: true},
+    option: {type: Array},
+    type: {type: String},
     correct: {type: String, required: true}
 });
 

@@ -9,6 +9,7 @@ const adminauthcontroller = require('../controller/adminauthcontroller'),
       AdminOtherController = require('../controller/AdminOtherController'),
       UserQuestionController = require('../controller/UserQuestionController'),
       UserInfoConroller = require('../controller/userInfoController'),
+      UserAnswerController = require('../controller/answercontroller'),
     upload = require('../middleware/file-upload');
 
 const MIME_TYPE_MAP = {
@@ -74,4 +75,10 @@ router.get('/admin/registeredCandidate', adminAuth, AdminOtherController.getRegi
 router.get('/user/get-question/regular', UserQuestionController.getRegularQuestion);
 router.get('/user/get-question/coding', UserQuestionController.getCodingQuestions);
 
+//Saving Answer
+router.post('/user/saveanswer', userAuth,UserAnswerController.onSaveAnswer);
+router.post('/user/codecompile' ,userAuth, UserAnswerController.onCodeCompile);
+router.post('/user/coderun', userAuth, UserAnswerController.onCodeRun);
+router.get('/user/submit-regular',userAuth, UserAnswerController.onSubmitReg);
+router.get('/user/submit-coding', userAuth, UserAnswerController.onSubmitCoding);
 module.exports = router;

@@ -2,46 +2,52 @@ const User = require('../Models/user'),
       Masrks= require('../Models/marks'),
       RegQuestion= require('../Models/regQuestion'),
       codingQuestion = require('../Models/codingQuestion'),
+      Common = require('../utils/response'),
       {c, cpp, java, python} = require('compile-run'),
       fs= require('fs');
 
 exports.onSaveAnswer = (req, res, next)=>{
+  let correct = false;
+  let questionType;
+  console.log(req.body);
   RegQuestion.findOne({_id: req.body.questionId})
     .then(question=>{
-      if( question.correct === req.body.option){
-        Masrks.findOne({user: req.body.userId}).then(marks=>{
-          if (masrks.submit_reg) {
-            res.status(200).json({
-              status: 0,
-              message: 'This Section Is Already Submit'
-            });
-          }
-          marks.questionmarks += 2;
-          marks.total= marks.questionmarks + marks.codingmarks;
-          marks.save();
-        });
-      }else {
-        Masrks.findOne({user: req.body.userId}).then(marks=>{
-          if (masrks.submit_reg) {
-            res.status(200).json({
-              status: 0,
-              message: 'This Section Is Already Submit'
-            });
-          }
-          marks.questionmarks -= 1;
-          marks.total= marks.questionmarks + marks.codingmarks;
-          marks.save();
-        });
+      console.log(question);
+      if (question.type === 'FUB' || question.type === 'MC') {
+        questionType =question.type;
+        if(question.correct === req.body.option) {
+          correct = true;
+          console.log(question);
+          return Masrks.findOne({user: req.body.userId});
+        }
+      } 
+      if(question.type === 'MC') {
+        console.log(question);
+        return Masrks.findOne({user: req.body.userId});
       }
-      res.status(200).json({
-        message: 'Answer Saved'
-      });
+      return res.json(Common.generateResponse(0,'Answer Saved'));
     })
-    .cache(err => {
-      res.status(500).json({
-        message: 'Save Failed Internal Server Error'
-      });
-    });
+    .then(marks => {
+      console.log(marks);
+      if(correct) {
+        marks.questionmarks += 2;
+        marks.total = marks.questionmarks+ marks.codingmarks;
+        return marks.save(); 
+      } else if(!correct && questionType=== 'MC') {
+        marks.questionmarks -= 1;
+        marks.total = marks.questionmarks+ marks.codingmarks;
+        return marks.save(); 
+      }
+      return res.json(Common.generateResponse(0,'Answer Saved'))
+    })
+    .then(resp => {
+      console.log(resp + 'Third Then');
+      return res.json(Common.generateResponse(0, resp));
+    })
+    .catch(err => {
+      console.log(err);
+      return res.json(Common.generateResponse(100, err));
+    })
 };
   exports.onCodeCompile = async (req, res, next)=>{
     console.log(req.body);
