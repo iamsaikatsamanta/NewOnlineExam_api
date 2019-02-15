@@ -4,11 +4,21 @@ const RegQuestion = require('../Models/regQuestion'),
 
 exports.saveQuestion = (req,res,next)=>{
     console.log(req.body);
-    const question = new RegQuestion({
-        question: req.body.question,
-        option: req.body.option,
-        correct: req.body.correct
-    });
+    let question;
+    if(req.body.type === 'MC') {
+        question = new RegQuestion({
+            question: req.body.question,
+            option: req.body.option,
+            correct: req.body.correct,
+            type: req.body.type
+        });
+    } else if(req.body.type === 'FUB') {
+        question = new RegQuestion({
+            question: req.body.question,
+            correct: req.body.correct,
+            type: req.body.type
+        });
+    }
     question.save()
         .then(savedQuestion => {
             return res.json(Common.generateResponse(0, savedQuestion));

@@ -15,7 +15,7 @@ exports.onSaveAnswer = (req, res, next)=>{
       console.log(question);
       if (question.type === 'FUB' || question.type === 'MC') {
         questionType =question.type;
-        if(question.correct === req.body.option) {
+        if(question.correct.toUpperCase() === req.body.option.toUpperCase()) {
           correct = true;
           console.log(question);
           return Masrks.findOne({user: req.body.userId});
