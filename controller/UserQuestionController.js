@@ -8,7 +8,8 @@ exports.getRegularQuestion = (req,res,next) => {
             return {
                 id: ele._id,
                 question: ele.question,
-                option: ele.option
+                option: ele.option,
+                type: ele.type
             };
         })));
     }).catch(err=>{
